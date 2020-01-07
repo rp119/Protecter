@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="30dp"
+    android:orientation="vertical"
+    >
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="none"
+    >
+    <LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:id="@+id/Lin0"
+    >
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_width="350dp"
+        android:layout_height="185dp"
+        android:background="#6AFFEB3B"
+        android:orientation="horizontal"
+        >
+        <ImageView
+            android:layout_width="170dp"
+            android:layout_height="140dp"
+            android:layout_marginTop="50dp"
+            android:background="#46C2185B"
+            android:id="@+id/ImagePicture0"
+            android:layout_marginRight="1dp"
+            >
+
+
+        </ImageView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이름 :"
+                android:textSize="20dp"
+                android:id="@+id/TVname0"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="나이 : "
+                android:textSize="20dp"
+                android:id="@+id/TVage0"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="성별 : "
+                android:textSize="20dp"
+                android:id="@+id/TVgender0"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="특징 : "
+                android:textSize="20dp"
+                android:id="@+id/TV0"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="위치 : "
+                android:textSize="20dp"
+                android:id="@+id/TVgps0"
+                />
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#6AFFEB3B"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1년간 @번, 이번달 @번, 이번주 @번"
+            android:textSize="20dp"
+            android:id="@+id/TVcount0"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="체온: "
+                android:textSize="20dp"
+                />
+            <ProgressBar
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:id="@+id/PB0"
+                android:max="45"
+                android:min="25"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="!!!℃"
+                android:textSize="20dp"
+                android:layout_marginLeft="30dp"
+                android:id="@+id/TVtem0"
+                />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/Lin1"
+        >
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_width="350dp"
+        android:layout_height="180dp"
+        android:background="#6AFFEB3B"
+        android:orientation="horizontal"
+        >
+        <ImageView
+            android:layout_width="170dp"
+            android:layout_height="140dp"
+            android:layout_marginTop="50dp"
+            android:background="#46C2185B"
+            android:id="@+id/ImagePicture1"
+            android:layout_marginRight="1dp"
+            >
+
+
+        </ImageView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이름 :"
+                android:textSize="20dp"
+                android:id="@+id/TVname1"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="나이 : "
+                android:textSize="20dp"
+                android:id="@+id/TVage1"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="성별 : "
+                android:textSize="20dp"
+                android:id="@+id/TVgender1"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="특징 : "
+                android:textSize="20dp"
+                android:id="@+id/TV1"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="위치 : "
+                android:textSize="20dp"
+                android:id="@+id/TVgps1"
+                />
+
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#6AFFEB3B"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1년간 @번, 이번달 @번, 이번주 @번"
+            android:textSize="20dp"
+            android:id="@+id/TVcount1"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="체온: "
+                android:textSize="20dp"
+                />
+            <ProgressBar
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:id="@+id/PB1"
+                android:max="45"
+                android:min="25"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="!!!℃"
+                android:textSize="20dp"
+                android:layout_marginLeft="30dp"
+                android:id="@+id/TVtem1"
+                />
+        </LinearLayout>
+    </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/Lin2"
+        >
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_width="350dp"
+        android:layout_height="180dp"
+        android:background="#6AFFEB3B"
+        android:orientation="horizontal"
+        >
+        <ImageView
+            android:layout_width="170dp"
+            android:layout_height="140dp"
+            android:layout_marginTop="50dp"
+            android:background="#46C2185B"
+            android:id="@+id/ImagePicture2"
+            android:layout_marginRight="1dp"
+            >
+
+
+        </ImageView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이름 :"
+                android:textSize="20dp"
+                android:id="@+id/TVname2"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="나이 : "
+                android:textSize="20dp"
+                android:id="@+id/TVage2"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="성별 : "
+                android:textSize="20dp"
+                android:id="@+id/TVgender2"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="특징 : "
+                android:textSize="20dp"
+                android:id="@+id/TV2"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="위치 : "
+                android:textSize="20dp"
+                android:id="@+id/TVgps2"
+                />
+
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#6AFFEB3B"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1년간 @번, 이번달 @번, 이번주 @번"
+            android:textSize="20dp"
+            android:id="@+id/TVcount2"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="체온: "
+                android:textSize="20dp"
+                />
+            <ProgressBar
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:id="@+id/PB2"
+                android:max="45"
+                android:min="25"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="!!!℃"
+                android:textSize="20dp"
+                android:layout_marginLeft="30dp"
+                android:id="@+id/TVtem2"
+                />
+        </LinearLayout>
+    </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/Lin3"
+        >
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_width="350dp"
+        android:layout_height="180dp"
+        android:background="#6AFFEB3B"
+        android:orientation="horizontal"
+        >
+        <ImageView
+            android:layout_width="170dp"
+            android:layout_height="140dp"
+            android:layout_marginTop="50dp"
+            android:background="#46C2185B"
+            android:id="@+id/ImagePicture3"
+            android:layout_marginRight="1dp"
+            >
+
+
+        </ImageView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이름 :"
+                android:textSize="20dp"
+                android:id="@+id/TVname3"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="나이 : "
+                android:textSize="20dp"
+                android:id="@+id/TVage3"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="성별 : "
+                android:textSize="20dp"
+                android:id="@+id/TVgender3"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="특징 : "
+                android:textSize="20dp"
+                android:id="@+id/TV3"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="위치 : "
+                android:textSize="20dp"
+                android:id="@+id/TVgps3"
+                />
+
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#6AFFEB3B"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1년간 @번, 이번달 @번, 이번주 @번"
+            android:textSize="20dp"
+            android:id="@+id/TVcount3"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="체온: "
+                android:textSize="20dp"
+                />
+            <ProgressBar
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:id="@+id/PB3"
+                android:max="45"
+                android:min="25"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="!!!℃"
+                android:textSize="20dp"
+                android:layout_marginLeft="30dp"
+                android:id="@+id/TVtem3"
+                />
+
+        </LinearLayout>
+    </LinearLayout>
+    </LinearLayout>
+    </LinearLayout>
+</ScrollView>
+</LinearLayout>
