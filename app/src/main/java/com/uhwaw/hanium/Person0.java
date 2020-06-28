@@ -2,14 +2,19 @@ package com.uhwaw.hanium;
 
 /*
 전화는 가능, 119는 ACTION_CALL이 안되고 ACTION_DIAL로 됨
- */
+ 지도에 마크찍고 범위 벗어나면 알림가게
 
+ */
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.Image;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Build;
 import androidx.annotation.NonNull;
 
@@ -27,6 +32,8 @@ import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,17 +43,19 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
+//
+//import com.jjoe64.graphview.GraphView;
+//import com.jjoe64.graphview.series.DataPoint;
+//import com.jjoe64.graphview.series.LineGraphSeries;
 
 public class Person0 extends AppCompatActivity {
 
-    TextView tvname, tvsex, tvage, tvresult;
-    Button btncount, btntel, btnmas, btngps, btntem, btnnine;
-    ImageView impicture, imtem;
+    public EditText par, son;
+    public Button reset;
+    public int n;
+    ImageButton  btntel, btngps, btnnine, btnsetting;
     Uri number;
+    Thread myThread;
     static final int SMS_SEND_PERMISSON = 1;
 
 
@@ -54,6 +63,8 @@ public class Person0 extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person0);
+        par = (EditText) findViewById(R.id.parData);
+        son = (EditText) findViewById(R.id.sonData);
         int permissonCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
 
         if (permissonCheck == PackageManager.PERMISSION_GRANTED) {
@@ -74,33 +85,46 @@ public class Person0 extends AppCompatActivity {
             }
         }
 
-        final GraphView graph = (GraphView) findViewById(R.id.graph);
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
-                new DataPoint(0, 1),
-                new DataPoint(1, 5),
-                new DataPoint(2, 3),
-                new DataPoint(3, 2),
-                new DataPoint(4, 6),
-        });
-        graph.addSeries(series);
-        graph.setTitle("이번달");
-        tvname = (TextView) findViewById(R.id.name);
-        tvage = (TextView) findViewById(R.id.age);
-        tvsex = (TextView) findViewById(R.id.sex);
-        tvresult = (TextView) findViewById(R.id.tvresult);
-        btncount = (Button) findViewById(R.id.count);
-        btnnine = (Button) findViewById(R.id.nine);
-        btngps = (Button) findViewById(R.id.gps);
-        btntem = (Button) findViewById(R.id.tem);
-        btnmas = (Button) findViewById(R.id.mssa);
-        btntel = (Button) findViewById(R.id.tel);
-        impicture = (ImageView) findViewById(R.id.picture);
-        imtem = (ImageView) findViewById(R.id.ImTem);
 
-        Intent intent = getIntent();
+
+//SharedPreferences
+        SharedPreferences pref = getSharedPreferences("Save",Context.MODE_PRIVATE);
+        n = pref.getInt("save",0);
+        if(n==1) {
+            par.setText("부모");
+            son.setVisibility(View.GONE);
+        }
+
+        else if(n==2){
+            son.setText("자녀");
+            par.setVisibility(View.GONE);
+        }
+        else{
+            son.setVisibility(View.GONE);
+            par.setVisibility(View.GONE);
+        }
+
+// 그래프 띄우기
+//        final GraphView graph = (GraphView) findViewById(R.id.graph);
+//        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
+//                new DataPoint(0, 1),
+//                new DataPoint(1, 5),
+//                new DataPoint(2, 3),
+//                new DataPoint(3, 2),
+//                new DataPoint(4, 6),
+//        });
+//        graph.addSeries(series);
+//        graph.setTitle("이번달");
+
+        btnnine = (ImageButton) findViewById(R.id.nine);
+        btngps = (ImageButton) findViewById(R.id.gps);
+        btnsetting = (ImageButton) findViewById(R.id.setting);
+        btntel = (ImageButton) findViewById(R.id.tel);
+
+      /*  Intent intent = getIntent();
         String name = intent.getStringExtra("name");
         String age = intent.getStringExtra("age");
-        String sex = intent.getStringExtra("sex");
+        String gender = intent.getStringExtra("gender");
         String phone = intent.getStringExtra("phone");
         String gps = intent.getStringExtra("gps");
         final int ycount = intent.getIntExtra("ycount", 161616);
@@ -108,75 +132,76 @@ public class Person0 extends AppCompatActivity {
         final int wcount = intent.getIntExtra("wcount", 141414);
         final int picture = intent.getIntExtra("picture", 131313);
         final Double tem = intent.getDoubleExtra("tem", 0);
+        */
+        String name = "김태욱";
+        String gender = "남자";
+        String age = "13";
+        int picture = 0x000000;
 
-        impicture.setBackgroundColor(picture);
-        tvname.setText("이름: " + name.toString());
-        tvsex.setText("성별: " + sex.toString());
-        tvage.setText("나이: " + age.toString());
-
-        btncount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String count = "올해 " + Integer.toString(ycount) + "번\n이번 달 " + Integer.toString(mcount) + "번\n이번 주 " + Integer.toString(wcount) + "번 ";
-                graph.setVisibility(View.VISIBLE);
-                tvresult.setText(count);
-                tvresult.setVisibility(View.VISIBLE);
-            }
-        });
+//        btncount.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String count = "올해 " + Integer.toString(ycount) + "번\n이번 달 " + Integer.toString(mcount) + "번\n이번 주 " + Integer.toString(wcount) + "번 ";
+//                graph.setVisibility(View.VISIBLE);
+//                tvresult.setText(count);
+//                tvresult.setVisibility(View.VISIBLE);
+//            }
+//        });
 
         btngps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(),GPS_EX.class);
-                startActivity(intent);
-            }
-        });
-        btntem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imtem.setVisibility(View.VISIBLE);
-                if (tem <= 35.5) {
-                    imtem.setBackgroundResource(R.drawable.t27);
-                    tvresult.setText("체온: " + tem.toString() + " 도\n저체온 \n증상은 @@ ");
-                } else if (tem < 37.0) {
-                    imtem.setBackgroundResource(R.drawable.t32);    //정상
-                    tvresult.setText("체온: " + tem.toString() + " 도\n정상체온\n증상은 @@ ");
-                } else if (tem >= 37.0) {
-                    imtem.setBackgroundResource(R.drawable.t38);
-                    tvresult.setText("체온: " + tem.toString() + " 도\n고온\n증상은 @@ ");
-                } else if (tem >= 38.0) {
-                    imtem.setBackgroundResource(R.drawable.t40);
-                    tvresult.setText("체온: " + tem.toString() + " 도\n 심한 고온\n 증상은 @@ ");
-                } else if (tem >= 39.0) {
-                    imtem.setBackgroundResource(R.drawable.t42);
-                    tvresult.setText("체온: " + tem.toString() + " 도\n 초고온\n 증상은 @@ ");
+
+                if (n == 1) {
+                    Intent intent13 = new Intent(getApplicationContext(),GPS_P.class);
+                    startActivity(intent13);
                 }
-                tvresult.setVisibility(View.VISIBLE);
+                if (n == 2){
+
+                    Intent intent = new Intent(getApplicationContext(), GPS_EX.class);
+                    startActivity(intent);
+                }
             }
         });
 
-        btnmas.setOnClickListener(new View.OnClickListener() {
-
+        btnsetting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //입력한 값을 가져와 변수에 담는다
-                String phoneNo = "010-7325-7090";
-                String sms = "@@@ 입니다 어플상으로는 @@@ 이라는데 괜찮으신가요?";
-
-                //전송
-                SmsManager smsManager = SmsManager.getDefault();
-                smsManager.sendTextMessage(phoneNo, null, sms, null, null);
-                Toast.makeText(getApplicationContext(), "전송 완료!", Toast.LENGTH_LONG).show();
-        }
+                Intent intent2 = new Intent(getApplicationContext(),SettingMenu.class);
+                startActivity(intent2);
+            }
         });
-        // 문자 보내기
+//        btntem.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                imtem.setVisibility(View.VISIBLE);
+//                if (tem <= 35.5) {
+//                    imtem.setBackgroundResource(R.drawable.t27);
+//                    tvresult.setText("체온: " + tem.toString() + " 도\n저체온 \n증상은 @@ ");
+//                } else if (tem < 37.0) {
+//                    imtem.setBackgroundResource(R.drawable.t32);    //정상
+//                    tvresult.setText("체온: " + tem.toString() + " 도\n정상체온\n증상은 @@ ");
+//                } else if (tem >= 37.0) {
+//                    imtem.setBackgroundResource(R.drawable.t38);
+//                    tvresult.setText("체온: " + tem.toString() + " 도\n고온\n증상은 @@ ");
+//                } else if (tem >= 38.0) {
+//                    imtem.setBackgroundResource(R.drawable.t40);
+//                    tvresult.setText("체온: " + tem.toString() + " 도\n 심한 고온\n 증상은 @@ ");
+//                } else if (tem >= 39.0) {
+//                    imtem.setBackgroundResource(R.drawable.t42);
+//                    tvresult.setText("체온: " + tem.toString() + " 도\n 초고온\n 증상은 @@ ");
+//                }
+//                tvresult.setVisibility(View.VISIBLE);
+//            }
+//        });
+
+
 
 
         btntel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 사용자의 OS 버전이 마시멜로우 이상인지 체크한다.
-                number = Uri.parse("tel:010-7325-7090");
+                number = Uri.parse("tel:010-9401-5487");
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     /**
                      * * 사용자 단말기의 권한 중 "전화걸기" 권한이 허용되어 있는지 확인한다. * Android는 C언어 기반으로 만들어졌기 때문에 Boolean 타입보다 Int 타입을 사용한다. */
@@ -314,4 +339,23 @@ public class Person0 extends AppCompatActivity {
         }
     }
     // 전화 권한 확인
+    protected void onDestroy() {
+        Log.i("Destroy","종료");
+        super.onDestroy();
+
+        //프로그램이 종료 될때
+        //SharedPreferences 객체에 저장.
+
+        SharedPreferences sharedPreferences
+                = getSharedPreferences("Save", Context.MODE_PRIVATE);
+        //1.매개변수 -> 파일명
+        //2.매개변수 -> 파일에대한 모드.. 0 아니면 Context.MODE_PRIVATE을 적는다..
+
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+
+        edit.putInt("save",n);
+
+        edit.commit();// 저장기능. commit을 하지 않으면 저장되지 않는다.
+
+    }
 }

@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -16,10 +18,13 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Looper;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -38,7 +43,6 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
@@ -82,41 +86,28 @@ import java.util.Locale;
 import java.util.Map;
 
 /*
-웹뷰를 통해 위도 경도를 받아오는것도 하나의 방법
-최선은 내가 누른곳의 위도경도를 넘겨줄 수 있고, 위도경도를 통해 그린존 설정
-차선은 위도경도를 알아온 후 그 위치 기준으로 그린존 설정
-
-붉은색 마커가 현재위치고
-파란색 마커가 EditText로 설정 가능
-
-
-위도 3km 0.027272727272727272727
-경도 0.0336
-
-문자 모션으로 줄 수 있음 주자
-
-홈키까지 가능
-- 강종하고도 되도록 시도하다가 안되면
-  Destroyed에서 문자보내기
-
-  배터리 받을 수 있으면 받기
+부모용 맵
 
 */
-public class GPS_EX extends AppCompatActivity
+public class GPS_P extends AppCompatActivity
         implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
     String a, b, c, d;
-    LatLng sg;
+    int orange;
     Double lat, lon;
     Double latt = 37.419740, lonn = 126.908476;
+    Double child_lat = 37.0, child_lon = 127.0;
     Double clicklatitude, clicklongitude;
+    String latitude,longitude;
     EditText Ed3;
     EditText Ed4;
+    TextView Ed_ChildLat, Ed_ChildLon;
     static final int SMS_SEND_PERMISSON = 1;
     int count = 0;
     LatLng home;
     private GoogleMap mGoogleMap = null;
     private Marker currentMarker = null;
     private Marker currentMarker1 = null;
+    public Marker currentMarkerChild = null;
     private Marker clickMarker = null;
 
     private static final String TAG = "googlemap_example";
@@ -134,9 +125,10 @@ public class GPS_EX extends AppCompatActivity
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};  // 외부 저장소
 
 
-    Location mCurrentLocatiion;
+//    Location mCurrentLocatiion;
     LatLng currentPosition;
     // TextView TvGPS;
+
 
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationRequest locationRequest;
@@ -146,11 +138,14 @@ public class GPS_EX extends AppCompatActivity
     private View mLayout;  // Snackbar 사용하기 위해서는 View가 필요합니다.
     // (참고로 Toast에서는 Context가 필요했습니다.)
 
-
+    NetWorkSend2 netWorkSend = new NetWorkSend2();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person0);
+
+
+//
         int permissonCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
 
         if (permissonCheck == PackageManager.PERMISSION_GRANTED) {
@@ -170,13 +165,12 @@ public class GPS_EX extends AppCompatActivity
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, SMS_SEND_PERMISSON);
             }
         }
-
         //TvGPS = (TextView)findViewById(R.id.gpstv);
 
 //         EtGPS = (EditText)findViewById(R.id.etgps);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.activity_gps__ex);
+        setContentView(R.layout.activity_g_p_s__p);
 
         mLayout = findViewById(R.id.layout_main);
 
@@ -187,7 +181,18 @@ public class GPS_EX extends AppCompatActivity
                 .setInterval(UPDATE_INTERVAL_MS)
                 .setFastestInterval(FASTEST_UPDATE_INTERVAL_MS);
 
+        Ed_ChildLat = (TextView) findViewById(R.id.etChildLat);
+        Ed_ChildLon = (TextView) findViewById(R.id.etChild_Lon);
 
+        if(Ed_ChildLat.getText() ==null|| Ed_ChildLon.getText() == null)
+        {
+            Ed_ChildLat.setText("123");
+            Ed_ChildLon.setText("345");
+        }
+        else {
+            getPreferences3();
+            getPreferences4();
+        }
         LocationSettingsRequest.Builder builder =
                 new LocationSettingsRequest.Builder();
 
@@ -198,13 +203,11 @@ public class GPS_EX extends AppCompatActivity
 
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(GPS_EX.this);
+        mapFragment.getMapAsync(GPS_P.this);
 
         // Toast.makeText(this, gps, Toast.LENGTH_LONG).show();
-        Intent intent123 = new Intent(getApplicationContext(), TimeService.class);
-        startService(intent123);
 
-        NetWorkSend netWorkSend = new NetWorkSend();
+
         netWorkSend.execute();
     }
 
@@ -221,51 +224,50 @@ public class GPS_EX extends AppCompatActivity
                 //location = locationList.get(0);
                 currentPosition
                         = new LatLng(location.getLatitude(), location.getLongitude());
-                String markerTitle = getCurrentAddress(currentPosition);
-                String markerSnippet = "위도:" + String.valueOf(location.getLatitude()) + " 경도:" + String.valueOf(location.getLongitude());
-                String markerSnippet1 = "위도:" + latt.toString() + " 경도:" + lonn.toString();
+////                String markerTitle = getCurrentAddress(currentPosition);
+//                String markerSnippet = "위도:" + String.valueOf(location.getLatitude()) + " 경도:" + String.valueOf(location.getLongitude());
+//                String markerSnippet1 = "위도:" + latt.toString() + " 경도:" + lonn.toString();
+//                String markerSnippetChild = "위도: (서버에서 넘겨주는 값 받아야함)  경도:";
 
-                Log.d(TAG, "onLocationResult : " + markerSnippet);
+                //Log.d(TAG, "onLocationResult : " + markerSnippet);
                 //   gps = markerSnippet;
                 //현재 위치에 마커 생성하고 이동
-                setCurrentLocation(location, markerTitle, markerSnippet, markerSnippet1);
-                mCurrentLocatiion = location;
-                TvGPs.setText("위도:" + String.valueOf(location.getLatitude())
-                        + " 경도:" + String.valueOf(location.getLongitude()));
-                //TextView에 현재위치의 위도와 경도를 표시한다.
+//                setCurrentLocation(location, markerTitle, markerSnippetChild, markerSnippet1);
+//                mCurrentLocatiion = location;
+
             }
         }
     };
+//
+//    private void startLocationUpdates() {
+//
+//        if (!checkLocationServicesStatus()) {
+//
+//            Log.d(TAG, "startLocationUpdates : call showDialogForLocationServiceSetting");
+//            showDialogForLocationServiceSetting();
+//        } else {
+//
+//            int hasFineLocationPermission = ContextCompat.checkSelfPermission(this,
+//                    Manifest.permission.ACCESS_FINE_LOCATION);
+//            int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(this,
+//                    Manifest.permission.ACCESS_COARSE_LOCATION);
+//
+//            if (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED ||
+//                    hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) {
+//
+//                //Log.d(TAG, "startLocationUpdates : 퍼미션 안가지고 있음");
+//                return;
+//            }
+//            Log.d(TAG, "startLocationUpdates : call mFusedLocationClient.requestLocationUpdates");
+//
+//            mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+//
+//            if (checkPermission())
+//                mGoogleMap.setMyLocationEnabled(true);
+//
+//        }
 
-    private void startLocationUpdates() {
-
-        if (!checkLocationServicesStatus()) {
-
-            Log.d(TAG, "startLocationUpdates : call showDialogForLocationServiceSetting");
-            showDialogForLocationServiceSetting();
-        } else {
-
-            int hasFineLocationPermission = ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION);
-            int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION);
-
-            if (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED ||
-                    hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) {
-
-                Log.d(TAG, "startLocationUpdates : 퍼미션 안가지고 있음");
-                return;
-            }
-            Log.d(TAG, "startLocationUpdates : call mFusedLocationClient.requestLocationUpdates");
-
-            mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
-
-            if (checkPermission())
-                mGoogleMap.setMyLocationEnabled(true);
-
-        }
-
-    }
+//    }
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
@@ -302,6 +304,7 @@ public class GPS_EX extends AppCompatActivity
                 Ed4.setText(clicklongitude.toString());
                 savePreferences(clicklatitude.toString());
                 savePreferences1(clicklongitude.toString());
+
             }
         });
 
@@ -350,7 +353,7 @@ public class GPS_EX extends AppCompatActivity
             // ( 안드로이드 6.0 이하 버전은 런타임 퍼미션이 필요없기 때문에 이미 허용된 걸로 인식합니다.)
 
 
-            startLocationUpdates(); // 3. 위치 업데이트 시작
+//            startLocationUpdates(); // 3. 위치 업데이트 시작
 
 
         } else {  //2. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요합니다. 2가지 경우(3-1, 4-1)가 있습니다.
@@ -366,7 +369,7 @@ public class GPS_EX extends AppCompatActivity
                     public void onClick(View view) {
 
                         // 3-3. 사용자게에 퍼미션 요청을 합니다. 요청 결과는 onRequestPermissionResult에서 수신됩니다.
-                        ActivityCompat.requestPermissions(GPS_EX.this, REQUIRED_PERMISSIONS,
+                        ActivityCompat.requestPermissions(GPS_P.this, REQUIRED_PERMISSIONS,
                                 PERMISSIONS_REQUEST_CODE);
                     }
                 }).show();
@@ -411,35 +414,35 @@ public class GPS_EX extends AppCompatActivity
         }
 
     }
-
-    public String getCurrentAddress(LatLng latlng) {
-
-
-        //지오코더... GPS를 주소로 변환
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-
-        List<Address> addresses;
-        lat = latlng.latitude;
-        lon = latlng.longitude;
-
-        try {
-            addresses = geocoder.getFromLocation(lat, lon, 1);
-        } catch (IOException ioException) {
-            //네트워크 문제
-            Toast.makeText(this, "지오코더 서비스 사용불가", Toast.LENGTH_LONG).show();
-            return "지오코더 서비스 사용불가";
-        } catch (IllegalArgumentException illegalArgumentException) {
-            Toast.makeText(this, "잘못된 GPS 좌표", Toast.LENGTH_LONG).show();
-            return "잘못된 GPS 좌표";
-        }
-        if (addresses == null || addresses.size() == 0) {
-            Toast.makeText(this, "주소 미발견", Toast.LENGTH_LONG).show();
-            return "주소 미발견";
-        } else {
-            Address address = addresses.get(0);
-            return address.getAddressLine(0).toString();
-        }
-    }
+//
+//    public String getCurrentAddress(LatLng latlng) {
+//
+//
+//        //지오코더... GPS를 주소로 변환
+//        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+//
+//        List<Address> addresses;
+//        lat = latlng.latitude;
+//        lon = latlng.longitude;
+//
+//        try {
+//            addresses = geocoder.getFromLocation(lat, lon, 1);
+//        } catch (IOException ioException) {
+//            //네트워크 문제
+//            Toast.makeText(this, "지오코더 서비스 사용불가", Toast.LENGTH_LONG).show();
+//            return "지오코더 서비스 사용불가";
+//        } catch (IllegalArgumentException illegalArgumentException) {
+//            Toast.makeText(this, "잘못된 GPS 좌표", Toast.LENGTH_LONG).show();
+//            return "잘못된 GPS 좌표";
+//        }
+//        if (addresses == null || addresses.size() == 0) {
+//            Toast.makeText(this, "주소 미발견", Toast.LENGTH_LONG).show();
+//            return "주소 미발견";
+//        } else {
+//            Address address = addresses.get(0);
+//            return address.getAddressLine(0).toString();
+//        }
+//    }
 
 
     public boolean checkLocationServicesStatus() {
@@ -450,62 +453,46 @@ public class GPS_EX extends AppCompatActivity
     }
 
 
-    public void setCurrentLocation(final Location location, String markerTitle, String markerSnippet, String markerSnippet1) {
+    public void setCurrentLocation(final Location location, String markerTitle, String markerSnippetChild, String markerSnippet1) {
+        Drawable drawable = getResources().getDrawable(R.drawable.child);
+        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+        Ed_ChildLat = (TextView) findViewById(R.id.etChildLat);
+        Ed_ChildLon = (TextView) findViewById(R.id.etChild_Lon);
 
 
         //위치를 받아와 그 위치에 marker를 찍는 매소드
         if (currentMarker != null) currentMarker.remove();
         if (currentMarker1 != null) currentMarker1.remove();
-        //위치정보가 없는경우 currentMarker와 currentMarker1의 marker를 삭제한다.
+//        if (currentMarkerChild != null) currentMarkerChild.remove();
 
-        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-        //currentLatLng.latitude = 위도
-        //currentLatLng.longitude = 경도
-        //currentLatLng는 현재의 위도와 경도를 받아와 저장한다.
+        //위치정보가 없는경우 currentMarker와 currentMarker1의 marker를 삭제한다.
 
         latt = Double.parseDouble(Ed3.getText().toString());
         lonn = Double.parseDouble(Ed4.getText().toString());
 
+
+        child_lat = 37.2;
+        child_lon = 127.0;
+
+        Log.d("qwe","Ed_LAT = " +Ed_ChildLat.toString()+"Ed_LON = " +Ed_ChildLon.toString());
+
+//            child_lat = Double.parseDouble(Ed_ChildLat.toString());
+//            child_lon = Double.parseDouble(Ed_ChildLon.toString());
+//
+
+//
+//        else {
+//            child_lat = Double.parseDouble(Ed_ChildLat.getText().toString());
+//            child_lon = Double.parseDouble(Ed_ChildLon.getText().toString());
+//        }
         LatLng currentLatLng1 = new LatLng(latt, lonn);
-        //currentLatLng1은 내가 지정한 경도와 위도를 저장한다.
-        Log.d("lattt", latt.toString());
-        Log.d("lattt", lonn.toString());
-        Double q = (latt > lat) ? latt : lat;
-        //변수 q는 지정되어있는 marker와 현재위치의 경도차를 계산하기위한 변수이다.
-        Double w, w1;// w와 w1은 설정해놓은 marker와 현재 위치의 위도차를 계산하기 위한 변수이다.
-        if (q == latt) w = lat;
 
-        else w = latt;
+        //currentLatLng1은 내가 지정한 (그린존 중심) 경도와 위도를 저장한다.
+        LatLng ChildLatlng = new LatLng(child_lat, child_lon);
+        //Log.d("lattt", latt.toString());
+        //Log.d("lattt", lonn.toString());
 
-        Double q1 = (lonn > lon) ? lonn : lon;
-        if (q1 == lonn) w1 = lon;
-
-        else w1 = lonn;
-
-        if (((q - w) > 0.02727272 && count == 0) || (q1 - w1) > 0.0336 && count == 0) {
-            //변수 count는 어플이 반복되면서 계속해서 문자가 가는것을 방지하기 위한 변수이다.
-            //위도의 차가0.04이고 count가 0일경우 또는 경도의 차가 1 이상이고 count가 0일경우
-            //자동으로 문자가 가는 매소드이다.
-            String phoneNo = "010-9401-5487";// 설정해놓은 번호로
-            String sms = "응급상황입니다. -Protector 가방";//이렇게 문자가 전송된다.
-            //전송
-//            SmsManager smsManager = SmsManager.getDefault();
-//            smsManager.sendTextMessage(phoneNo, null, sms, null, null);
-//            Toast.makeText(getApplicationContext(), "전송 완료!", Toast.LENGTH_LONG).show();
-            count++;
-        }
-
-        MarkerOptions markerOptions = new MarkerOptions();
-        //MarkerOptions 새로운 객체를 설정한다.
-        markerOptions.position(currentLatLng);
-        //marker의 Default 위치를 서울로 설정한다.
-        markerOptions.title(markerTitle);
-        //marker를 누르면 나오는 마커의 title를 markerTitle변수의 값으로 설정한다.
-        markerOptions.snippet(markerSnippet);
-        //markerTitle 밑에 위도 경도값을 나타내는 변수 markerSnippet로 설정한다.
-        markerOptions.draggable(true);
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-        //marker의 색을 빨간색으로 지정한다.
 
         //markerOption1은 집이나 학원같은 아이가 자주가는 고정된 위치를 저장할 위치이다.
         MarkerOptions markerOptions1 = new MarkerOptions();
@@ -515,11 +502,7 @@ public class GPS_EX extends AppCompatActivity
         markerOptions1.draggable(true);
         markerOptions1.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
         //현재위치와 구분하기 쉽게 하기 위해 marker의 색을 파란색으로 변경하였다.
-
-        currentMarker = mGoogleMap.addMarker(markerOptions);
         currentMarker1 = mGoogleMap.addMarker(markerOptions1);
-
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng);
 
 
     }
@@ -537,7 +520,7 @@ public class GPS_EX extends AppCompatActivity
         String markerSnippet = "위치 퍼미션과 GPS 활성 요부 확인하세요";
         //Marker의 위도 경도를 저장할 변수 markerSnippet에 Default값을 넣어준다.
 
-        if (currentMarker != null) currentMarker.remove();
+        //if (currentMarker != null) currentMarker.remove();
 
         MarkerOptions markerOptions = new MarkerOptions();
         //MarkerOptions 새로운 객체를 설정한다.
@@ -592,7 +575,7 @@ public class GPS_EX extends AppCompatActivity
             if (check_result) {
 
                 // 퍼미션을 허용했다면 위치 업데이트를 시작합니다.
-                startLocationUpdates();
+//                startLocationUpdates();
             } else {
                 // 거부한 퍼미션이 있다면 앱을 사용할 수 없는 이유를 설명해주고 앱을 종료합니다.2 가지 경우가 있습니다.
 
@@ -626,7 +609,7 @@ public class GPS_EX extends AppCompatActivity
     //여기부터는 GPS 활성화를 위한 메소드들
     private void showDialogForLocationServiceSetting() {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(GPS_EX.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(GPS_P.this);
         builder.setTitle("위치 서비스 비활성화");
         builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
                 + "위치 설정을 수정하실래요?");
@@ -678,7 +661,6 @@ public class GPS_EX extends AppCompatActivity
         SharedPreferences pref1 = getSharedPreferences("pref1", MODE_PRIVATE);
         String homeLon = pref1.getString("lon", "127");
         Ed4.setText(homeLon);
-
     }
 
     private void savePreferences(String s) {
@@ -697,6 +679,36 @@ public class GPS_EX extends AppCompatActivity
         finish();
     }
 
+    private void getPreferences3() {
+        SharedPreferences pref = getSharedPreferences("child_pref", MODE_PRIVATE);
+        String childLat = pref.getString("child_lat", "37");
+        Ed_ChildLat.setText(childLat);
+    }
+
+    private void getPreferences4() {
+
+        SharedPreferences pref1 = getSharedPreferences("child_pref1", MODE_PRIVATE);
+        String childLon = pref1.getString("child_lon", "127");
+        Ed_ChildLon.setText(childLon);
+
+    }
+
+    private void savePreferences3(String s) {
+        SharedPreferences pref = getSharedPreferences("child_pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("child_lat", s);
+        editor.commit();
+        finish();
+    }
+
+    private void savePreferences4(String s) {
+        SharedPreferences pref1 = getSharedPreferences("child_pref1", MODE_PRIVATE);
+        SharedPreferences.Editor editor1 = pref1.edit();
+        editor1.putString("child_lon", s);
+        editor1.commit();
+        finish();
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -705,10 +717,41 @@ public class GPS_EX extends AppCompatActivity
         latt = Double.parseDouble(Ed3.getText().toString());
         lonn = Double.parseDouble(Ed4.getText().toString());
 
-    }
+        netWorkSend.cancel(true);
+        Log.d("QWE","onDestroy");
 
-    class NetWorkSend extends AsyncTask {
-        public NetWorkSend() {
+        LatLng currentLatLng1 = new LatLng(latt, lonn);
+        //currentLatLng1은 내가 지정한 경도와 위도를 저장한다.
+        //Log.d("lattt", latt.toString());
+        //Log.d("lattt", lonn.toString());
+//        Double q = (latt > lat) ? latt : lat;
+//        //변수 q는 지정되어있는 marker와 현재위치의 경도차를 계산하기위한 변수이다.
+//        Double w, w1;// w와 w1은 설정해놓은 marker와 현재 위치의 위도차를 계산하기 위한 변수이다.
+//        if (q == latt) w = lat;
+//
+//        else w = latt;
+//
+//        Double q1 = (lonn > lon) ? lonn : lon;
+//        if (q1 == lonn) w1 = lon;
+//
+//        else w1 = lonn;
+//        count = 0;
+//        if (((q - w) > 0.02727272 && count == 0) || (q1 - w1) > 0.0336 && count == 0) {
+//            //변수 count는 어플이 반복되면서 계속해서 문자가 가는것을 방지하기 위한 변수이다.
+//            //위도의 차가0.04이고 count가 0일경우 또는 경도의 차가 1 이상이고 count가 0일경우
+//            //자동으로 문자가 가는 매소드이다.
+//            String phoneNo = "010-9401-5487";// 설정해놓은 번호로
+//            String sms = "응급상황입니다. -Protector 가방";//이렇게 문자가 전송된다.
+//            //전송
+//            SmsManager smsManager = SmsManager.getDefault();
+//            smsManager.sendTextMessage(phoneNo, null, sms, null, null);
+//            Toast.makeText(getApplicationContext(), "전송 완료!", Toast.LENGTH_LONG).show();
+//            //Log.d("qwe", "TEST");
+//        }
+    }
+    class NetWorkSend2 extends AsyncTask {
+        private Marker currentMarkerChild;
+        public NetWorkSend2() {
             super();
         }
 
@@ -741,101 +784,49 @@ public class GPS_EX extends AppCompatActivity
         @Override
         protected Object doInBackground(Object[] objects) {
             while (true) {
+                if(isCancelled() == true) {
+                    return 0;
+                }
                 try {
+                    findLocation();
                     Thread.sleep(5000);
-                    sendToServer();
-                    //findLocation();
-                    //connectChild();
-                    //Log.d("async_", "서버 발송  : " + lat.toString() + ", " + lon.toString());
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
-
-
-        public void sendToServer() {
-            HttpURLConnection httpURLConnection = null;
-//            String CONNECT_IP = "http://172.16.111.136:3000/process/add_gps";
-
+        public void findLocation() {
+            Log.d("findlocation", "실행은 됐나?");
+//            String CONNECT_IP = "http://172.16.111.136:3000/process/findLocation";
             String CONNECT_IP = "http://192.168.137.98:3000/process/add_gps";
 
-            Log.d("errrr", "!!");
-            int count = 0;
-            try {
 
-                Log.d("errrr", "!!2");
-                TelephonyManager telephonyManager
-                        = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                //@SuppressLint({"MissingPermission", "HardwareIds"}) String mobile = telephonyManager.getLine1Number().replace("-", "").replace("+82", "0");
-                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                String mobile = telephonyManager.getLine1Number().replace("-", "").replace("+82", "0");
-
-                //String mobile = "01011112222";
-                String data = URLEncoder.encode("phoneNumber", "UTF-8") + "=" + URLEncoder.encode(mobile, "UTF-8");
-                data += "&" + URLEncoder.encode("lat", "UTF-8") + "=" + URLEncoder.encode(lat.toString(), "UTF-8");
-                data += "&" + URLEncoder.encode("lng", "UTF-8") + "=" + URLEncoder.encode(lon.toString(), "UTF-8");
-
-                Log.d("errr", mobile);
-                URL url = new URL(CONNECT_IP);
-
-                //Log.d("connectServer", "접속url : " + url);
-                //Log.d("connectServer", "send data : " + data);
-                //Log.d("connectServer", "동작횟수 : " + ++count);
-
-
-                Log.d("errrr","!!3");
-                httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoInput(true);
-                httpURLConnection.setDoOutput(true);
-                OutputStreamWriter wr = new OutputStreamWriter(httpURLConnection.getOutputStream());
-                wr.write(data);
-                wr.flush();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8"));
-
-                Log.d("errrr","!!5");
-                StringBuilder sb = new StringBuilder();
-                //Log.d("async_gps", "" + lat.toString() + ", " + lon.toString());
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-
-                    httpURLConnection.disconnect();
-
-                    Log.d("errrr","!!66");
-                }
-            } catch (Exception e) {
-
-                Log.d("errrr","!!6");
-                httpURLConnection.disconnect();
-            }
-        }
-
-        public void findLocation() {
-            String CONNECT_IP = "http://172.16.111.136:3000/process/findLocation";
             StringRequest request = new StringRequest(Request.Method.POST, CONNECT_IP, new com.android.volley.Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try {
-                        Log.d("findLocation", "서버는 들어옴");
                         JSONObject jsonObject = new JSONObject(response);
-                        String latitude = jsonObject.getString("latitude");
-                        String longitude = jsonObject.getString("longitude");
-                        Log.d("findLocation", "서버에서 받은 위도 경도 " + latitude + " , " + longitude);
-                        Toast.makeText(GPS_EX.this, "db조회 위도 : " + latitude + " 경도 : " + longitude, Toast.LENGTH_SHORT).show();
+                        latitude = jsonObject.getString("latitude");
+                        longitude = jsonObject.getString("longitude");
+                        Toast.makeText(GPS_P.this, "db2조회 위도 : " + latitude + " 경도 : " + longitude, Toast.LENGTH_SHORT).show();
 
+                        if (currentMarkerChild != null)
+                            currentMarkerChild.remove();
+
+
+
+                        LatLng ChildLatlng = new LatLng(Double.parseDouble(latitude),Double.parseDouble(longitude));
+                        MarkerOptions markerOptions123 = new MarkerOptions();
+                        markerOptions123.position(ChildLatlng);
+                        markerOptions123.title("아이의 위치");
+                        markerOptions123.snippet("markerSnippetChild");
+                        markerOptions123.draggable(true);
+                        markerOptions123.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+                        currentMarkerChild = mGoogleMap.addMarker(markerOptions123);
+                        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(ChildLatlng);
+                        orange = 1;
+                        Ed_ChildLat.setText(latitude);
+                        Ed_ChildLon.setText(longitude);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -844,7 +835,6 @@ public class GPS_EX extends AppCompatActivity
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Log.d("servererror", "error findLocation in myService");
                             error.printStackTrace();
                         }
                     }
@@ -856,64 +846,14 @@ public class GPS_EX extends AppCompatActivity
                             = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                     Map<String, String> params = new HashMap<>();
 
-                    //임시로 내번호 받아오기
-                    params.put("parentsNumber", telephonyManager.getLine1Number().replace("-", "").replace("+82", "0"));
+                    params.put("parentsNumber", "01076229705");
                     //params.put("parentsNumber", "01011112222");//자녀
                     return params;
                 }
             };
 
             request.setShouldCache(false);
-            //request.setRetryPolicy(new DefaultRetryPolicy(2000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            Request<String> add = Volley.newRequestQueue(GPS_EX.this).add(request);
-            //println("웹 서버에 요청함 : " + url);
-            //Log.d("async_", "웹 서버에 접속 요청함");
-        }
-        public void connectChild() {
-            String CONNECT_IP = "http://172.16.111.136:3000/process/connectChild";
-            StringRequest request = new StringRequest(Request.Method.POST, CONNECT_IP, new com.android.volley.Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        Log.d("findLocation", "서버는 들어옴");
-//                        JSONObject jsonObject = new JSONObject(response);
-//                        String latitude = jsonObject.getString("latitude");
-//                        String longitude = jsonObject.getString("longitude");
-//                        Log.d("findLocation", "서버에서 받은 위도 경도 " + latitude + " , " + longitude);
-//                        Toast.makeText(myService.this, "db조회 위도 : " + latitude + " 경도 : " + longitude, Toast.LENGTH_SHORT).show();
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            },
-                    new com.android.volley.Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d("servererror", "error 발생 myService, connectChild");
-                            error.printStackTrace();
-                        }
-                    }
-            ) {
-                @SuppressLint({"MissingPermission", "HardwareIds"})
-                @Override
-                protected Map<String, String> getParams() {
-                    TelephonyManager telephonyManager
-                            = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                    Map<String, String> params = new HashMap<>();
-
-                    //내번호 = 부모번호
-                    params.put("parentsNumber", "01076229705");
-                    //params.put("childNumber", "01011112222");
-                    return params;
-                }
-            };
-
-            request.setShouldCache(false);
-            //request.setRetryPolicy(new DefaultRetryPolicy(2000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            Request<String> add = Volley.newRequestQueue(GPS_EX.this).add(request);
-            //println("웹 서버에 요청함 : " + url);
-            //Log.d("async_", "웹 서버에 접속 요청함");
+            Request<String> add = Volley.newRequestQueue(GPS_P.this).add(request);
         }
     }
 }

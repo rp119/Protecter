@@ -2,30 +2,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.uhwaw.hanium">
 
-    <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAKclhgX2ojxZBAzBa6wVVh1JZsUNx9G6Y">
-
-        </meta-data>
-        <activity android:name=".GPS_EX"></activity>
+        android:theme="@style/Theme.AppCompat.NoActionBar"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:usesCleartextTraffic="true"
+        >
+        <activity android:name=".SettingMenu"></activity>
+        <activity android:name=".GPS_P" />
+        <activity android:name=".GPS_EX" />
         <activity android:name=".Person0" />
+        <activity android:name=".Select" />
         <activity android:name=".ProtectMode" />
-        <activity android:name=".Choose" />
+        <activity android:name=".Setting" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,6 +26,41 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAKclhgX2ojxZBAzBa6wVVh1JZsUNx9G6Y" />
+
+        <service android:name=".myService" />
+        <service android:name=".TimeService" />
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
     </application>
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH" ></uses-permission>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" ></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
 
 </manifest>
