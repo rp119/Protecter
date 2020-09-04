@@ -98,6 +98,7 @@ public class GPS_P extends AppCompatActivity
     Double child_lat = 37.0, child_lon = 127.0;
     Double clicklatitude, clicklongitude;
     String latitude,longitude;
+    String greenzoneValue;
     EditText Ed3;
     EditText Ed4;
     TextView Ed_ChildLat, Ed_ChildLon;
@@ -414,36 +415,6 @@ public class GPS_P extends AppCompatActivity
         }
 
     }
-//
-//    public String getCurrentAddress(LatLng latlng) {
-//
-//
-//        //지오코더... GPS를 주소로 변환
-//        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-//
-//        List<Address> addresses;
-//        lat = latlng.latitude;
-//        lon = latlng.longitude;
-//
-//        try {
-//            addresses = geocoder.getFromLocation(lat, lon, 1);
-//        } catch (IOException ioException) {
-//            //네트워크 문제
-//            Toast.makeText(this, "지오코더 서비스 사용불가", Toast.LENGTH_LONG).show();
-//            return "지오코더 서비스 사용불가";
-//        } catch (IllegalArgumentException illegalArgumentException) {
-//            Toast.makeText(this, "잘못된 GPS 좌표", Toast.LENGTH_LONG).show();
-//            return "잘못된 GPS 좌표";
-//        }
-//        if (addresses == null || addresses.size() == 0) {
-//            Toast.makeText(this, "주소 미발견", Toast.LENGTH_LONG).show();
-//            return "주소 미발견";
-//        } else {
-//            Address address = addresses.get(0);
-//            return address.getAddressLine(0).toString();
-//        }
-//    }
-
 
     public boolean checkLocationServicesStatus() {
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -720,34 +691,7 @@ public class GPS_P extends AppCompatActivity
         netWorkSend.cancel(true);
         Log.d("QWE","onDestroy");
 
-        LatLng currentLatLng1 = new LatLng(latt, lonn);
-        //currentLatLng1은 내가 지정한 경도와 위도를 저장한다.
-        //Log.d("lattt", latt.toString());
-        //Log.d("lattt", lonn.toString());
-//        Double q = (latt > lat) ? latt : lat;
-//        //변수 q는 지정되어있는 marker와 현재위치의 경도차를 계산하기위한 변수이다.
-//        Double w, w1;// w와 w1은 설정해놓은 marker와 현재 위치의 위도차를 계산하기 위한 변수이다.
-//        if (q == latt) w = lat;
-//
-//        else w = latt;
-//
-//        Double q1 = (lonn > lon) ? lonn : lon;
-//        if (q1 == lonn) w1 = lon;
-//
-//        else w1 = lonn;
-//        count = 0;
-//        if (((q - w) > 0.02727272 && count == 0) || (q1 - w1) > 0.0336 && count == 0) {
-//            //변수 count는 어플이 반복되면서 계속해서 문자가 가는것을 방지하기 위한 변수이다.
-//            //위도의 차가0.04이고 count가 0일경우 또는 경도의 차가 1 이상이고 count가 0일경우
-//            //자동으로 문자가 가는 매소드이다.
-//            String phoneNo = "010-9401-5487";// 설정해놓은 번호로
-//            String sms = "응급상황입니다. -Protector 가방";//이렇게 문자가 전송된다.
-//            //전송
-//            SmsManager smsManager = SmsManager.getDefault();
-//            smsManager.sendTextMessage(phoneNo, null, sms, null, null);
-//            Toast.makeText(getApplicationContext(), "전송 완료!", Toast.LENGTH_LONG).show();
-//            //Log.d("qwe", "TEST");
-//        }
+
     }
     class NetWorkSend2 extends AsyncTask {
         private Marker currentMarkerChild;
@@ -797,23 +741,28 @@ public class GPS_P extends AppCompatActivity
         }
         public void findLocation() {
             Log.d("findlocation", "실행은 됐나?");
-//            String CONNECT_IP = "http://172.16.111.136:3000/process/findLocation";
-            String CONNECT_IP = "http://192.168.137.98:3000/process/add_gps";
-
+            String CONNECT_IP = "http://172.16.111.136:3000/process/findLocation";
+//            String CONNECT_IP = "http://192.168.137.98:3000/process/add_gps";
 
             StringRequest request = new StringRequest(Request.Method.POST, CONNECT_IP, new com.android.volley.Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try {
+                        Log.d("findlocation", "실행은 됐다");
+
                         JSONObject jsonObject = new JSONObject(response);
                         latitude = jsonObject.getString("latitude");
                         longitude = jsonObject.getString("longitude");
-                        Toast.makeText(GPS_P.this, "db2조회 위도 : " + latitude + " 경도 : " + longitude, Toast.LENGTH_SHORT).show();
-
+                        greenzoneValue = jsonObject.getString("greenZoneValue");
+                        Toast.makeText(GPS_P.this, "db2조회 위도 : " + latitude + " 경도 : " + longitude + " GREENZONE" + greenzoneValue , Toast.LENGTH_SHORT).show();
+                        Log.d("findlocation", "!@#") ;
                         if (currentMarkerChild != null)
                             currentMarkerChild.remove();
 
+//                        latitude = String.valueOf(37.552);
+//                        longitude = String.valueOf(127.003);
 
+                        Log.d("findlocation", "!@#3") ;
 
                         LatLng ChildLatlng = new LatLng(Double.parseDouble(latitude),Double.parseDouble(longitude));
                         MarkerOptions markerOptions123 = new MarkerOptions();
@@ -827,6 +776,8 @@ public class GPS_P extends AppCompatActivity
                         orange = 1;
                         Ed_ChildLat.setText(latitude);
                         Ed_ChildLon.setText(longitude);
+                        Log.d("findlocation", "!44@#") ;
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

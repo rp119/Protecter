@@ -56,9 +56,9 @@ public class MainActivity extends AppCompatActivity {
     // 단말기기 등록 메소드
     public void add_device() {
         //학교
-//        String url = "http://172.16.111.136:3000/process/adddevice";
+        String url = "http://172.16.111.136:3000/process/adddevice";
 
-        String url = "http://192.168.137.98:3000/process/add_gps";
+//        String url = "http://192.168.137.98:3000/process/add_gps";
 
         //핫스팟
         //String url = "http://172.20.10.2:3000/process/adddevice";
@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
         @SuppressLint("HardwareIds") String mobile = telephonyManager.getLine1Number().replace("-", "").replace("+82", "0");
 //        // 애뮬레이터(전화번호가 없으므로)
-//        String mobile = "01011112222";
+//        String mobile = "01076229705";
 
         //2. osVer
         String osVersion = Build.VERSION.RELEASE;

@@ -164,8 +164,8 @@ public class SettingMenu extends AppCompatActivity {
 
 
     public void connectChild(final String childNum) {
-//        String CONNECT_IP = "http://172.16.111.136:3000/process/connectChild";
-        String CONNECT_IP = "http://192.168.137.98:3000/process/add_gps";
+        String CONNECT_IP = "http://172.16.111.136:3000/process/connectChild";
+//        String CONNECT_IP = "http://192.168.137.98:3000/process/add_gps";
 
 
         StringRequest request = new StringRequest(Request.Method.POST, CONNECT_IP, new Response.Listener<String>() {
